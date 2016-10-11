@@ -1,0 +1,26 @@
+import org.apache.spark.streaming._
+import org.apache.spark.rdd._
+
+def printRDD (r: RDD[String], t: Time) : Unit = {
+   println ("[" + t + "]")
+   r.foreach(println);
+   println ("==========================")
+}
+ 
+val ssc = new StreamingContext(sc, Seconds(4))
+
+val DStreamOfLines = ssc.socketTextStream("localhost", 4321)
+
+val words = DStreamOfLines.flatMap(_.split(" "))
+
+words.foreachRDD( printRDD(_, Time(System.currentTimeMillis)))
+ 
+ssc.start()
+ 
+ssc.awaitTermination()
+
+
+
+
+
+
