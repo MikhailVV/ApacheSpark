@@ -1,0 +1,15 @@
+import org.apache.spark.streaming._
+import org.apache.spark.rdd._
+
+val windowSizeSeconds = System.getenv("windowSizeSeconds").toInt   
+val windowSlideSeconds = System.getenv("windowSlideSeconds").toInt   
+println (windowSizeSeconds + "; " + windowSlideSeconds)
+val ssc = new StreamingContext(sc, Seconds(4))
+val dstream = ssc.textFileStream("file:///home/hdfs/Works/Vote/")
+val yesCount = dstream.filter ( _.toUpperCase.contains("YES"))
+val noCount = dstream.filter ( _.toUpperCase.contains("NO"))
+ssc.checkpoint("file:///home/hdfs/Works/CHKPNT/")
+yesCount.countByWindow(Seconds(windowSizeSeconds), Seconds(windowSlideSeconds)).print()
+noCount.countByWindow(Seconds(windowSizeSeconds), Seconds(windowSlideSeconds)).print()
+ssc.start()
+ssc.awaitTermination()
