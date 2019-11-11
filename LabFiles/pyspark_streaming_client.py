@@ -1,11 +1,10 @@
-
+# Run the application with this command:
+# spark-submit --driver-memory 512M pyspark_streaming_client.py 
 # --driver-memory should be at a minimum of 512M, or will choke with an error
-# spark-submit --driver-memory 512M pyspark_streaming_client.py
+
 
 from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
-
-
  
 # Start polling for data on 2 threads every interval_sec seconds
 threads = 2
@@ -19,8 +18,7 @@ sc.setLogLevel("ERROR")
 
 hostname = 'localhost'
 port = 9999
-# Connect to hostname:port
-# Create a DStream (a stream of RDDs)
+# Connect to hostname:port and create a DStream (a stream of RDDs)
 lines = ssc.socketTextStream(hostname, port)
 
 # Count the words
@@ -34,7 +32,6 @@ word_count = pairs.reduceByKey(lambda x, y: x + y)
 # on the driver node running the streaming application.
 # This is useful for development and debugging.
 word_count.pprint()
-#word_count.foreachRDD(lambda r: print(r))
 
 ssc.start()            
 ssc.awaitTermination() 
