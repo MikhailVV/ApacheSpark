@@ -4,6 +4,7 @@ from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
+from awsglue.dynamicframe import DynamicFrame
 
 glueContext = GlueContext(SparkContext.getOrCreate())
 
@@ -32,7 +33,10 @@ four_way_join_dyf = Join.apply(order_details,
       'customer id', 'customer id'),
       'order id', 'order id')
 
-dyf_out = four_way_join_dyf.select_fields(['order id', 'order detail id', 'employee id', 'customer id']) 
+dyf_sel = four_way_join_dyf.select_fields(['order id', 'order detail id', 'employee id', 'customer id']) 
+
+# Make it a two-file output to speed up the write op a bit ...
+dyf_out = dyf_sel.coalesce(2)
 
 glueContext.write_dynamic_frame.from_options(frame = dyf_out,
           connection_type = "s3",
